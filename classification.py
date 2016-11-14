@@ -20,21 +20,12 @@ An example of a dish
 """
 
 # preprocess data
-def generateMatrix(n_ingr, data):
-    matrix = []
-    for dish in data:
-        row = [0] * n_ingr
-        for ingr in dish['ingredients']:
-            row[ingr] = 1
-        matrix.append(row)
-    return matrix
-
 with open('data/train.json') as f:
     trainData = json.load(f)
-    allCuisines = {}
+    allCuisines = {} # map from cuisine name to number
     allCuisinesList = []
-    allIngredients = {}
-    cntIngr = 0
+    allIngredients = {} # map from ingredient name to number
+    cntIngr = 0 # counter for ingredients
     for dish in trainData:
         # processing cuisine
         cuisine = dish['cuisine']
@@ -66,11 +57,13 @@ with open('data/test.json') as f:
             row[allIngredients[ingr]] = 1
         testDataMatrix.append(row)
 
+# Plug in algorithm here
 from sklearn.naive_bayes import GaussianNB
 clf = GaussianNB()
 clf.fit(trainDataMatrix, [dish['cuisine'] for dish in trainData])
 result = map(lambda i: allCuisinesList[i], clf.predict(testDataMatrix))
 
+# Output in csv for submission on Kaggle
 import csv
 with open('submission.csv', 'wb') as f:
     writer = csv.writer(f)
