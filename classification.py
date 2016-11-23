@@ -21,7 +21,7 @@ An example of a dish
 }
 """
 # pandas to load data
-traindf = pd.load_json('data/train.json')
+traindf = pd.read_json('data/train.json')
 print "Creating the bag of words features...\n"
 traindf['ingredients_clean_string'] = [' '.join(ingred).strip().lower() for ingred in traindf['ingredients']]
 
@@ -82,7 +82,7 @@ with open('data/test.json') as f:
 from sklearn.svm import SVC
 clf = SVC()
 print 'Starting training'
-clf.fit(trainDataMatrix, [dish['cuisine'] for dish in trainData])
+clf.fit(train_data_features, traindf['cuisine'])
 print 'Starting predicting'
 result = map(lambda i: allCuisinesList[i], clf.predict(testDataMatrix))
 
