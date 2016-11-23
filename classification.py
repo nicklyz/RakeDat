@@ -58,9 +58,15 @@ with open('data/test.json') as f:
         testDataMatrix.append(row)
 
 # Plug in algorithm here
-from sklearn.naive_bayes import GaussianNB
-clf = GaussianNB()
+#from sklearn.naive_bayes import GaussianNB # 34.4%
+#clf = GaussianNB()
+#from sklearn.tree import DecisionTreeClassifier # 61.9%
+#clf = DecisionTreeClassifier()
+from sklearn.svm import SVC
+clf = SVC()
+print 'Starting training'
 clf.fit(trainDataMatrix, [dish['cuisine'] for dish in trainData])
+print 'Starting predicting'
 result = map(lambda i: allCuisinesList[i], clf.predict(testDataMatrix))
 
 # Output in csv for submission on Kaggle
