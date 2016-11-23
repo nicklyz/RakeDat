@@ -1,4 +1,6 @@
 import json
+import pandas as pd
+import numpy as np
 
 """
 An example of a dish
@@ -18,6 +20,21 @@ An example of a dish
   ]
 }
 """
+# pandas to load data
+traindf = pd.load_json('data/train.json')
+print "Creating the bag of words features...\n"
+traindf['ingredients_clean_string'] = [' '.join(ingred).strip().lower() for ingred in traindf['ingredients']]
+
+from sklearn.feature_extraction.text import CountVectorizer
+# use scikit-learn's bag of words tool
+vectorizer = CountVectorizer(analyzer = "word",   \
+                             tokenizer = None,    \
+                             preprocessor = None, \
+                             stop_words = None,   \
+                             max_features = 5000)
+# this create a sparse matrix with shape(39774, 3010)
+train_data_features = vectorizer.fit_transform(traindf['ingredients_clean_string'])
+train_data_features = train_data_features.toarray()
 
 # preprocess data
 with open('data/train.json') as f:
@@ -76,4 +93,3 @@ with open('submission.csv', 'wb') as f:
     writer.writerow(('id', 'cuisine'))
     for i, ingr in zip([dish['id'] for dish in testData], result):
         writer.writerow((i, ingr))
-    
