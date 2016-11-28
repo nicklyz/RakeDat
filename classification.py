@@ -84,10 +84,15 @@ startTime = time()
 result = map(lambda i: allCuisinesList[i], clf.predict(testDataMatrix))
 print 'Predicting finished in {:f}s'.format(time() - startTime)
 
+import pandas as pd
+testdf = pd.read_json('data/test.json')
+output = pd.DataFrame(data={"id":testdf["id"], "cuisine":result})
+output.to_csv("data/submission.csv", index=False, quoting=3)
 # Output in csv for submission on Kaggle
-import csv
-with open('submission.csv', 'wb') as f:
-    writer = csv.writer(f)
-    writer.writerow(('id', 'cuisine'))
-    for i, ingr in zip([dish['id'] for dish in testData], result):
-        writer.writerow((i, ingr))
+# import csv
+# with open('submission.csv', 'wb') as f:
+#     writer = csv.writer(f)
+#     writer.writerow(('id', 'cuisine'))
+#     for i, ingr in zip([dish['id'] for dish in testData], result):
+#         writer.writerow((i, ingr))
+#
