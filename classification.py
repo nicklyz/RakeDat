@@ -1,4 +1,5 @@
 import json
+from time import time
 
 """
 An example of a dish
@@ -60,14 +61,28 @@ with open('data/test.json') as f:
 # Plug in algorithm here
 #from sklearn.naive_bayes import GaussianNB # 34.4%
 #clf = GaussianNB()
-#from sklearn.tree import DecisionTreeClassifier # 61.9%
-#clf = DecisionTreeClassifier()
-from sklearn.svm import SVC
-clf = SVC()
+
+#from sklearn.naive_bayes import MultinomialNB # 73.914%
+#clf = MultinomialNB()
+
+#from sklearn.tree import DecisionTreeClassifier
+#clf = DecisionTreeClassifier() # using gini 61.9%
+#clf = DecisionTreeClassifier(criterion='entropy') # 56.4%
+
+#from sklearn.linear_model import LogisticRegression # 78.329%
+#clf = LogisticRegression()
+
+from sklearn.neighbors import KNeighborsClassifier
+clf = KNeighborsClassifier()
+
 print 'Starting training'
+startTime = time()
 clf.fit(trainDataMatrix, [dish['cuisine'] for dish in trainData])
+print 'Training finished in {:f}s'.format(time() - startTime)
 print 'Starting predicting'
+startTime = time()
 result = map(lambda i: allCuisinesList[i], clf.predict(testDataMatrix))
+print 'Predicting finished in {:f}s'.format(time() - startTime)
 
 # Output in csv for submission on Kaggle
 import csv
@@ -76,4 +91,3 @@ with open('submission.csv', 'wb') as f:
     writer.writerow(('id', 'cuisine'))
     for i, ingr in zip([dish['id'] for dish in testData], result):
         writer.writerow((i, ingr))
-    
