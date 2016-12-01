@@ -5,6 +5,11 @@ from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 class ClassificationBagOfWords(Classification):
+    def __init__(self, trainFile, testFile, outputFile, clf, use_hashing, n_features):
+        super(Classification, self).__init__(self, trainFile, testFile, outputFile, clf)
+        self.use_hashing = use_hashing
+        self.n_features = n_features
+
     def preprocess(self):
         # pandas to load data
         self.traindf = pd.read_json(self.trainFile)

@@ -1,16 +1,16 @@
 #!/usr/bin/python
-import sys, getopt
+import sys
 from time import time
 from optparse import OptionParser
 
 def main(argv):
     # parse commandline arguments
     op = OptionParser()
-    op.add_option("-r", "--trainfile", dest="trainfile",
+    op.add_option("-i", "--trainfile", dest="trainfile",
                   default="data/train.json",
                   help="Training file "
                        "[default: %default]")
-    op.add_option("-s", "--testfile", dest="testfile",
+    op.add_option("-t", "--testfile", dest="testfile",
                   default="data/test.json",
                   help="Testing file "
                        "[default: %default]")
@@ -21,7 +21,7 @@ def main(argv):
     op.add_option("--use_hashing",
                   action="store_true",
                   help="Use a hashing vectorizer instead of Tf-idf vectorizer. "
-                       "[defualt: False]")
+                       "[default: False]")
     op.add_option("--n_features",
                   action="store", type=int, default=5000,
                   help="n_features when using the hashing vectorizer. "
@@ -30,45 +30,44 @@ def main(argv):
                   action="store_true", dest="bag_of_words",
                   help="Use the bag of words model to vectorize features. "
                        "[default: False]")
-    (opts, args) = op.parse_args()
-    if len(args) > 0:
-        op.error("this script takes no arguments.")
-        sys.exit(1)
+    opts, args = op.parse_args()
 
-    print(__doc__)
-    op.print_help()
-
-    # usage = 'usage: classification.py [-b] [-i| <trainfile>] [-t <testfile>] [-o <outputfile>]'
     trainfile = opts.trainfile
     testfile = opts.testfile
     outputfile = opts.outputfile
     use_bag_of_words = opts.bag_of_words
-    n_features = opts.n_features
-    use_hashing = opts.use_hashing
-
-    # Plug in algorithm here
-#    from sklearn.naive_bayes import GaussianNB # 34.443%
-#    clf = GaussianNB()
-
-#    from sklearn.naive_bayes import MultinomialNB # 73.914%
-#    clf = MultinomialNB()
-
-#    from sklearn.tree import DecisionTreeClassifier
-#    clf = DecisionTreeClassifier() # using gini 61.9%
-#    clf = DecisionTreeClassifier(criterion='entropy') # 56.4%
-
-    from sklearn.linear_model import LogisticRegression # 78.329%
-    clf = LogisticRegression()
+    
+    if len(args) > 1:
+        print usage
+        sys.exit(2)
+    if len(args) == 0 or args[0] == 'MNB':
+        from sklearn.naive_bayes import MultinomialNB # 73.914%
+        clf = MultinomialNB()
+    elif args[0] == 'GNB':
+        from sklearn.naive_bayes import GaussianNB # 34.443%
+        clf = GaussianNB()
+    elif args[0] == 'GiniDT':
+        from sklearn.tree import DecisionTreeClassifier
+        clf = DecisionTreeClassifier() # using gini 61.9%
+    elif args[0] == 'InfoDT':
+        from sklearn.tree import DecisionTreeClassifier
+        clf = DecisionTreeClassifier(criterion='entropy') # 56.4%
+    elif args[0] == 'LR':
+        from sklearn.linear_model import LogisticRegression # 78.329%
+        clf = LogisticRegression()
+    else:
+        print 'Algorithm {} not recognized'.format(args[0])
+        sys.exit(2)
 
 #    from sklearn.neighbors import KNeighborsClassifier
 #    clf = KNeighborsClassifier()
 
     if use_bag_of_words:
         from classification_bow import ClassificationBagOfWords
-        executor = ClassificationBagOfWords(trainfile, testfile, outputfile, clf, use_hashing, n_features)
+        executor = ClassificationBagOfWords(trainfile, testfile, outputfile, clf, opts.use_hashing, opts.n_features)
     else:
         from classification_plain import ClassificationPlain
-        executor = ClassificationPlain(trainfile, testfile, outputfile, clf, use_hashing, n_features)
+        executor = ClassificationPlain(trainfile, testfile, outputfile, clf)
     print 'Starting preprocessing'
     startTime = time()
     executor.preprocess()
