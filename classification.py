@@ -1,4 +1,4 @@
-class Classification:
+class Classification(object):
     def __init__(self, trainFile, testFile, outputFile, clf):
         self.trainFile = trainFile
         self.testFile = testFile

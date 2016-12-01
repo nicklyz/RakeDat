@@ -1,71 +1,67 @@
 #!/usr/bin/python
 import sys
 from time import time
-from optparse import OptionParser
+import argparse
 
 def main(argv):
     # parse commandline arguments
-    op = OptionParser()
-    op.add_option("-i", "--trainfile", dest="trainfile",
-                  default="data/train.json",
-                  help="Training file "
-                       "[default: %default]")
-    op.add_option("-t", "--testfile", dest="testfile",
-                  default="data/test.json",
-                  help="Testing file "
-                       "[default: %default]")
-    op.add_option("-o", "--outputfile", dest="outputfile",
-                  default="submission.csv",
-                  help="Output file "
-                       "[default: %default]")
-    op.add_option("--use_hashing",
-                  action="store_true",
-                  help="Use a hashing vectorizer instead of Tf-idf vectorizer. "
-                       "[default: False]")
-    op.add_option("--n_features",
-                  action="store", type=int, default=5000,
-                  help="n_features when using the hashing vectorizer. "
-                       "[default: 5000]")
-    op.add_option("-b", "--bag_of_words",
-                  action="store_true", dest="bag_of_words",
-                  help="Use the bag of words model to vectorize features. "
-                       "[default: False]")
-    opts, args = op.parse_args()
-
-    trainfile = opts.trainfile
-    testfile = opts.testfile
-    outputfile = opts.outputfile
-    use_bag_of_words = opts.bag_of_words
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument('-i', '--trainfile', dest='trainfile',
+                        default='data/train.json',
+                        help='training file\n(default: %(default)s)')
+    parser.add_argument('-t', '--testfile', dest='testfile',
+                        default='data/test.json',
+                        help='testing file\n(default: %(default)s)')
+    parser.add_argument('-o', '--outputfile', dest='outputfile',
+                        default='submission.csv',
+                        help='output file\n(default: %(default)s)')
+    parser.add_argument('--use_hashing', action='store_true',
+                        help='use a hashing vectorizer instead of Tf-idf vectorizer\n(default: %(default)s)')
+    parser.add_argument('--n_features', action='store',
+                        type=int, default=5000,
+                        help='n_features when using the hashing vectorizer\n(default: %(default)d)')
+    parser.add_argument('-b', '--bag_of_words', action='store_true',
+                        help='use the bag of words model to vectorize features\n(default: %(default)s)')
+    parser.add_argument('model', nargs='?',
+                        default='MNB',
+                        help='model for training and predicting\n'
+                        'GNB: Gaussian Naive Bayes\n'
+                        'MNB: Multinomial Naive Bayes\n'
+                        'GiniDT: Decision Tree with Gini Index\n'
+                        'InfoDT: Decision Tree with Information Gain\n'
+                        'LR: Logistic Regression\n(default: %(default)s)')
+    args = parser.parse_args()
     
-    if len(args) > 1:
-        print 'Too many arguments, only 1 needed\n'
-        op.print_help()
-        sys.exit(2)
-    if len(args) == 0 or args[0] == 'MNB':
+    trainfile = args.trainfile
+    testfile = args.testfile
+    outputfile = args.outputfile
+    model = args.model
+    
+    if model == 'MNB':
         from sklearn.naive_bayes import MultinomialNB # 73.914%
         clf = MultinomialNB()
-    elif args[0] == 'GNB':
+    elif model == 'GNB':
         from sklearn.naive_bayes import GaussianNB # 34.443%
         clf = GaussianNB()
-    elif args[0] == 'GiniDT':
+    elif model == 'GiniDT':
         from sklearn.tree import DecisionTreeClassifier
         clf = DecisionTreeClassifier() # using gini 61.9%
-    elif args[0] == 'InfoDT':
+    elif model == 'InfoDT':
         from sklearn.tree import DecisionTreeClassifier
         clf = DecisionTreeClassifier(criterion='entropy') # 56.4%
-    elif args[0] == 'LR':
+    elif model == 'LR':
         from sklearn.linear_model import LogisticRegression # 78.329%
         clf = LogisticRegression()
     else:
-        print 'Train model {} not recognized'.format(args[0])
+        print 'Train model {} not recognized'.format(model)
         sys.exit(2)
 
 #    from sklearn.neighbors import KNeighborsClassifier
 #    clf = KNeighborsClassifier()
 
-    if use_bag_of_words:
+    if args.bag_of_words:
         from classification_bow import ClassificationBagOfWords
-        executor = ClassificationBagOfWords(trainfile, testfile, outputfile, clf, opts.use_hashing, opts.n_features)
+        executor = ClassificationBagOfWords(trainfile, testfile, outputfile, clf, args.use_hashing, args.n_features)
     else:
         from classification_plain import ClassificationPlain
         executor = ClassificationPlain(trainfile, testfile, outputfile, clf)
