@@ -42,8 +42,9 @@ def main(argv):
     trainfile = opts.trainfile
     testfile = opts.testfile
     outputfile = opts.outputfile
-    useBagOfWords = opts.bag_of_words
+    use_bag_of_words = opts.bag_of_words
     n_features = opts.n_features
+    use_hashing = opts.use_hashing
 
     # Plug in algorithm here
 #    from sklearn.naive_bayes import GaussianNB # 34.443%
@@ -62,12 +63,12 @@ def main(argv):
 #    from sklearn.neighbors import KNeighborsClassifier
 #    clf = KNeighborsClassifier()
 
-    if useBagOfWords:
+    if use_bag_of_words:
         from classification_bow import ClassificationBagOfWords
-        executor = ClassificationBagOfWords(trainfile, testfile, outputfile, clf)
+        executor = ClassificationBagOfWords(trainfile, testfile, outputfile, clf, use_hashing, n_features)
     else:
         from classification_plain import ClassificationPlain
-        executor = ClassificationPlain(trainfile, testfile, outputfile, clf)
+        executor = ClassificationPlain(trainfile, testfile, outputfile, clf, use_hashing, n_features)
     print 'Starting preprocessing'
     startTime = time()
     executor.preprocess()
