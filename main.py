@@ -38,7 +38,8 @@ def main(argv):
     use_bag_of_words = opts.bag_of_words
     
     if len(args) > 1:
-        print usage
+        print 'Too many arguments, only 1 needed\n'
+        op.print_help()
         sys.exit(2)
     if len(args) == 0 or args[0] == 'MNB':
         from sklearn.naive_bayes import MultinomialNB # 73.914%
@@ -56,7 +57,7 @@ def main(argv):
         from sklearn.linear_model import LogisticRegression # 78.329%
         clf = LogisticRegression()
     else:
-        print 'Algorithm {} not recognized'.format(args[0])
+        print 'Train model {} not recognized'.format(args[0])
         sys.exit(2)
 
 #    from sklearn.neighbors import KNeighborsClassifier
