@@ -22,14 +22,19 @@ def main(argv):
                         help='n_features when using the hashing vectorizer\n(default: %(default)d)')
     parser.add_argument('-b', '--bag_of_words', action='store_true',
                         help='use the bag of words model to vectorize features\n(default: %(default)s)')
+    parser.add_argument('--max_iter', action='store',
+                        type=int, default=100,
+                        help='max number of iterations when using SVMs')
     parser.add_argument('model', nargs='?',
                         default='MNB',
                         help='model for training and predicting\n'
-                        'GNB: Gaussian Naive Bayes\n'
-                        'MNB: Multinomial Naive Bayes\n'
-                        'GiniDT: Decision Tree with Gini Index\n'
-                        'InfoDT: Decision Tree with Information Gain\n'
-                        'LR: Logistic Regression\n(default: %(default)s)')
+                        ' GNB: Gaussian Naive Bayes\n'
+                        ' MNB: Multinomial Naive Bayes\n'
+                        ' GiniDT: Decision Tree with Gini Index\n'
+                        ' InfoDT: Decision Tree with Information Gain\n'
+                        ' SVM: C Support Vector Machine\n'
+                        ' LinearSVM: Linear Support Vector Machine\n'
+                        ' LR: Logistic Regression\n(default: %(default)s)')
     args = parser.parse_args()
     
     trainfile = args.trainfile
@@ -38,26 +43,29 @@ def main(argv):
     model = args.model
     
     if model == 'MNB':
-        from sklearn.naive_bayes import MultinomialNB # 73.914%
+        from sklearn.naive_bayes import MultinomialNB # 0.73914
         clf = MultinomialNB()
     elif model == 'GNB':
-        from sklearn.naive_bayes import GaussianNB # 34.443%
+        from sklearn.naive_bayes import GaussianNB # 0.34443
         clf = GaussianNB()
     elif model == 'GiniDT':
         from sklearn.tree import DecisionTreeClassifier
-        clf = DecisionTreeClassifier() # using gini 61.9%
+        clf = DecisionTreeClassifier() # using gini 0.61947; 0.62611 -b
     elif model == 'InfoDT':
         from sklearn.tree import DecisionTreeClassifier
         clf = DecisionTreeClassifier(criterion='entropy') # 56.4%
+    elif model == 'SVM':
+        from sklearn.svm import SVC # 0.50975 -b max_iter=20
+        clf = SVC(max_iter=args.max_iter)
+    elif model == 'LinearSVM':
+        from sklearn.svm import LinearSVC # 0.77293; 0.78681 -b
+        clf = LinearSVC(max_iter=args.max_iter)
     elif model == 'LR':
-        from sklearn.linear_model import LogisticRegression # 78.329%
+        from sklearn.linear_model import LogisticRegression # 0.78329
         clf = LogisticRegression()
     else:
         print 'Train model {} not recognized'.format(model)
         sys.exit(2)
-
-#    from sklearn.neighbors import KNeighborsClassifier
-#    clf = KNeighborsClassifier()
 
     if args.bag_of_words:
         from classification_bow import ClassificationBagOfWords
@@ -74,6 +82,9 @@ def main(argv):
     startTime = time()
     executor.train()
     print 'Training finished in {:f}s'.format(time() - startTime)
+    
+    print 'Calculating accuracy on training dataset'
+    print 'Accuracy on training dataset: {:f}'.format(executor.accuracyOnTrain())
 
     print 'Starting predicting'
     startTime = time()

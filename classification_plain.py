@@ -1,6 +1,7 @@
 from classification import Classification
 import json
 import csv
+from sklearn.metrics import accuracy_score
 
 class ClassificationPlain(Classification):
     allCuisinesList = []
@@ -49,6 +50,9 @@ class ClassificationPlain(Classification):
     
     def predict(self):
         self.result = map(lambda i: self.allCuisinesList[i], self.clf.predict(self.testDataMatrix))
+    
+    def accuracyOnTrain(self):
+        return accuracy_score(self.trainDataCuisines, self.clf.predict(self.trainDataMatrix)).item()
     
     def output(self):
         with open(self.outputFile, 'wb') as f:

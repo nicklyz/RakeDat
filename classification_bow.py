@@ -20,7 +20,7 @@ class ClassificationBagOfWords(Classification):
             vectorizer = HashingVectorizer(analyzer='word', stop_words=None, n_features=self.n_features)
         else:
             vectorizer = TfidfVectorizer(sublinear_tf=False, max_df=0.5,
-                binary = False, analyzer='word', stop_words='english')
+                binary=False, analyzer='word', stop_words='english')
 
         print "Creating the bag of words features for training data..."
         self.traindf['ingredients_clean_string'] = [' '.join(ingred).strip().lower() for ingred in self.traindf['ingredients']]
@@ -37,6 +37,9 @@ class ClassificationBagOfWords(Classification):
 
     def predict(self):
         self.result = self.clf.predict(self.test_data_features)
+    
+    def accuracyOnTrain(self):
+        return -1 # TO DO
 
     def output(self):
         output = pd.DataFrame(data={'id': self.testdf['id'], 'cuisine': self.result})
