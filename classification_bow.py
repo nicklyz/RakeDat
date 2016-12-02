@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import accuracy_score
 
 class ClassificationBagOfWords(Classification):
     def __init__(self, trainFile, testFile, outputFile, clf, use_hashing, n_features):
@@ -37,9 +38,9 @@ class ClassificationBagOfWords(Classification):
 
     def predict(self):
         self.result = self.clf.predict(self.test_data_features)
-    
+
     def accuracyOnTrain(self):
-        return -1 # TO DO
+        return accuracy_score(self.traindf['cuisine'], self.clf.predict(self.train_data_features)).item()
 
     def output(self):
         output = pd.DataFrame(data={'id': self.testdf['id'], 'cuisine': self.result})
